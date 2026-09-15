@@ -86,8 +86,7 @@ az provider register --namespace <NAMESPACE>
    region.
 
 ```bash
-az vm list-usage --location <REGION> --query "[?contains(name.value, 'Standard DSv') \
-  || contains(name.value, 'Standard Dv')].{Name:name.value, Used:currentValue, Limit:limit}" --output table
+az vm list-usage --location <REGION> --query "[?contains(name.localizedValue, 'Standard DSv') || contains(name.localizedValue, 'Standard Dv')].{Name:name.localizedValue, Used:currentValue, Limit:limit}" --output table
 ```
 
 
