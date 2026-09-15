@@ -10,7 +10,7 @@ and verify they are ready for deployment to Kubernetes.
 
 ## Description
 
-The application source code is available in [`Student/Resources/src/`](./Resources/src/).
+The application source code is available in [`Student/Resources/src/`](https://github.com/microsoft/frontier-aks-hackathon/tree/main/Student/Resources/src).
 
 - Create a new **Azure Resource Group** for all resources used in this hackathon.
 - Deploy an **Azure Container Registry (ACR)** with **Premium SKU** — required for private
