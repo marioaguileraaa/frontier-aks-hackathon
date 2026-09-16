@@ -1,9 +1,14 @@
 api:
   image:
-    repository: <ACR_LOGIN_SERVER>/fabtech-api
-    tag: v1
+    repository: acraksab.azurecr.io/content-api
+    tag: v2
     pullPolicy: IfNotPresent
   replicaCount: 2
+  autoscaling:
+    enabled: true
+  serviceAccountName: fabtech-api-sa
+  database:
+    secretProviderClass: fabtech-secrets
   service:
     port: 3001
   pdb:
@@ -19,7 +24,7 @@ api:
 
 web:
   image:
-    repository: <ACR_LOGIN_SERVER>/fabtech-web
+    repository: acraksab.azurecr.io/content-web
     tag: v1
     pullPolicy: IfNotPresent
   replicaCount: 2

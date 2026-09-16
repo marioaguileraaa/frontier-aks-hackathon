@@ -1,5 +1,6 @@
 'use strict';
 
+const { readFile } = require('node:fs/promises');
 const { Pool } = require('pg');
 const sessionsData = require('./sessions');
 const speakersData = require('./speakers');
@@ -7,10 +8,12 @@ const speakersData = require('./speakers');
 let pool = null;
 
 async function init() {
-  const connStr = process.env.DATABASE_URL;
+  const connStr = (
+    await readFile('/mnt/secrets/db-connection-string', 'utf8')
+  ).trim();
+
   if (!connStr) {
-    console.log('DATABASE_URL not set — using local JSON data');
-    return false;
+    throw new Error('El archivo de conexion de PostgreSQL esta vacio');
   }
 
   // Expected format: postgresql://user:password@host:5432/dbname?sslmode=require
@@ -23,12 +26,12 @@ async function init() {
   try {
     await pool.query('SELECT 1');
     console.log('Connected to PostgreSQL');
-  } catch (err) {
-    console.error('Failed to connect to PostgreSQL:', err.message);
-    console.error('Check DATABASE_URL and ensure the server is reachable and SSL is configured correctly');
+  } catch {
     await pool.end().catch(() => {});
     pool = null;
-    return false;
+    throw new Error(
+      'No se pudo conectar a PostgreSQL usando el secreto montado'
+    );
   }
 
   await pool.query(`
