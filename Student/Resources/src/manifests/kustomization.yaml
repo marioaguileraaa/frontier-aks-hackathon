@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - serviceaccount.yaml
   - secretproviderclass.yaml
+  - security-networkpolicy.yaml

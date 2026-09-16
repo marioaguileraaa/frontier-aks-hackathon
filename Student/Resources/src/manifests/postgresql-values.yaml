@@ -1,0 +1,31 @@
+fullnameOverride: fabtech-postgresql
+architecture: standalone
+global:
+  security:
+    allowInsecureImages: true
+image:
+  registry: acraksab.azurecr.io
+  repository: postgresql
+  tag: challenge08
+  digest: sha256:b69d1fca390fb131639e86e820f248acfc5d911339dc884796f8009260c598d7
+auth:
+  username: fabtech
+  database: fabtech
+  existingSecret: fabtech-postgresql-auth
+primary:
+  networkPolicy:
+    enabled: false
+  persistence:
+    enabled: true
+    storageClass: managed-csi
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  pdb:
+    create: true
+    minAvailable: 1
