@@ -28,6 +28,10 @@ spec:
         name: cluster-config
         namespace: cluster-config
   values:
+    sharedStorage:
+      enabled: true
+      existingClaim: c09-shared-content
+      mountPath: /mnt/shared
     api:
       image:
         repository: acraksab.azurecr.io/content-api

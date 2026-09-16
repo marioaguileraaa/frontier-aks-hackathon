@@ -42,6 +42,11 @@ web:
       cpu: 500m
       memory: 256Mi
 
+sharedStorage:
+  enabled: false
+  existingClaim: c09-shared-content
+  mountPath: /mnt/shared
+
 # Traffic exposure is handled separately — choose one:
 #   Option A (Gateway API via App Routing):  kubectl apply -f ../gateway.yaml
 #   Option B (Gateway API via AGC):          kubectl apply -f ../agc.yaml

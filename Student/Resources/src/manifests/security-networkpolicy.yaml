@@ -77,9 +77,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/instance: fabtech-db
-              app.kubernetes.io/name: postgresql
-              app.kubernetes.io/component: primary
+              app: c09-postgresql
       ports:
         - protocol: TCP
           port: 5432
@@ -92,9 +90,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/instance: fabtech-db
-      app.kubernetes.io/name: postgresql
-      app.kubernetes.io/component: primary
+      app: c09-postgresql
   policyTypes: [Ingress]
   ingress:
     - from:
