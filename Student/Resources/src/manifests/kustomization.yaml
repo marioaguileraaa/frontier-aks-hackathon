@@ -4,3 +4,5 @@ resources:
   - serviceaccount.yaml
   - secretproviderclass.yaml
   - security-networkpolicy.yaml
+  - c09-postgresql.yaml
+  - c09-shared-storage.yaml

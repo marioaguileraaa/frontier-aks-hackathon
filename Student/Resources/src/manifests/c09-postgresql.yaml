@@ -1,0 +1,159 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: c09-postgres-disk
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Premium_LRS
+  fsType: ext4
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: c09-postgresql
+  namespace: fabtech
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  clusterIP: None
+  selector:
+    app: c09-postgresql
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: c09-postgresql
+  namespace: fabtech
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  serviceName: c09-postgresql
+  replicas: 1
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  selector:
+    matchLabels:
+      app: c09-postgresql
+  template:
+    metadata:
+      labels:
+        app: c09-postgresql
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgresql
+          image: acraksab.azurecr.io/postgresql@sha256:b69d1fca390fb131639e86e820f248acfc5d911339dc884796f8009260c598d7
+          env:
+            - name: POSTGRES_USER
+              value: fabtech
+            - name: POSTGRES_DATABASE
+              value: fabtech
+            - name: POSTGRES_PASSWORD_FILE
+              value: /opt/bitnami/postgresql/secrets/password
+            - name: POSTGRES_POSTGRES_PASSWORD_FILE
+              value: /opt/bitnami/postgresql/secrets/postgres-password
+            - name: PGDATA
+              value: /bitnami/postgresql/data
+            - name: POSTGRESQL_VOLUME_DIR
+              value: /bitnami/postgresql
+            - name: OPENSSL_FIPS
+              value: "yes"
+            - name: OPENSSL_FIPS_PROVIDER_PATH
+              value: /etc/ssl/provider_fips.cnf
+          ports:
+            - name: postgresql
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-U", "fabtech", "-d", "fabtech"]
+            periodSeconds: 5
+            failureThreshold: 60
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-U", "fabtech", "-d", "fabtech"]
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-U", "fabtech", "-d", "fabtech"]
+            periodSeconds: 20
+            failureThreshold: 6
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/postgresql
+            - name: temporary
+              mountPath: /tmp
+              subPath: tmp
+            - name: temporary
+              mountPath: /opt/bitnami/postgresql/conf
+              subPath: conf
+            - name: temporary
+              mountPath: /opt/bitnami/postgresql/tmp
+              subPath: runtime
+            - name: passwords
+              mountPath: /opt/bitnami/postgresql/secrets
+              readOnly: true
+            - name: shared-memory
+              mountPath: /dev/shm
+      volumes:
+        - name: temporary
+          emptyDir: {}
+        - name: passwords
+          secret:
+            secretName: fabtech-postgresql-auth
+        - name: shared-memory
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: c09-postgres-disk
+        resources:
+          requests:
+            storage: 8Gi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: c09-postgresql
+  namespace: fabtech
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: c09-postgresql

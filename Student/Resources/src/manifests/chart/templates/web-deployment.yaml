@@ -52,3 +52,15 @@ spec:
             capabilities:
               drop: ["ALL"]
             readOnlyRootFilesystem: true
+          {{- if .Values.sharedStorage.enabled }}
+          volumeMounts:
+            - name: shared-content
+              mountPath: {{ .Values.sharedStorage.mountPath | quote }}
+              readOnly: false
+          {{- end }}
+      {{- if .Values.sharedStorage.enabled }}
+      volumes:
+        - name: shared-content
+          persistentVolumeClaim:
+            claimName: {{ .Values.sharedStorage.existingClaim | quote }}
+      {{- end }}

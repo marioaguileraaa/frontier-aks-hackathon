@@ -57,6 +57,11 @@ spec:
             - name: secrets-store
               mountPath: /mnt/secrets
               readOnly: true
+            {{- if .Values.sharedStorage.enabled }}
+            - name: shared-content
+              mountPath: {{ .Values.sharedStorage.mountPath | quote }}
+              readOnly: false
+            {{- end }}
       volumes:
         - name: secrets-store
           csi:
@@ -64,3 +69,8 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: {{ .Values.api.database.secretProviderClass | quote }}
+        {{- if .Values.sharedStorage.enabled }}
+        - name: shared-content
+          persistentVolumeClaim:
+            claimName: {{ .Values.sharedStorage.existingClaim | quote }}
+        {{- end }}
