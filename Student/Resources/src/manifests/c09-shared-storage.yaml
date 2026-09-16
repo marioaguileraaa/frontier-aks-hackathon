@@ -1,13 +1,18 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: c09-shared-files
+  name: c09-shared-files-mi
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
 provisioner: file.csi.azure.com
 parameters:
   skuName: Standard_LRS
   protocol: smb
+  resourceGroup: MC_rg-aks-lab_aks-hack-lab_swedencentral
+  storageAccount: ff817ced33bc0462d95e100
+  shareName: c09-shared-content-mi
+  mountWithManagedIdentity: "true"
+  storeAccountKey: "false"
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
@@ -23,13 +28,13 @@ mountOptions:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: c09-shared-content
+  name: c09-shared-content-mi
   namespace: fabtech
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   accessModes: [ReadWriteMany]
-  storageClassName: c09-shared-files
+  storageClassName: c09-shared-files-mi
   resources:
     requests:
       storage: 5Gi
