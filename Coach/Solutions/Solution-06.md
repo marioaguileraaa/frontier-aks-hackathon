@@ -41,7 +41,7 @@ kubectl set resources deployment/fabtech-api \
 # Create HPA
 kubectl autoscale deployment fabtech-api \
   --namespace $NAMESPACE \
-  --cpu-percent=50 \
+  --cpu=50% \
   --min=2 \
   --max=10
 
