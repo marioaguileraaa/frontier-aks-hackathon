@@ -13,6 +13,7 @@ auth:
   database: fabtech
   existingSecret: fabtech-postgresql-auth
 primary:
+  replicaCount: 0
   networkPolicy:
     enabled: false
   persistence:
