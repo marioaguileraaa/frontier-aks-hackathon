@@ -41,4 +41,4 @@ spec:
       image:
         repository: acraksab.azurecr.io/content-web
         tag: v1
-      replicaCount: 2
+      replicaCount: 3
